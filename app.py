@@ -4,9 +4,8 @@ import csv
 import io
 import os
 
-HOST = "localhost"
-PORT = 8000
-
+HOST = "0.0.0.0"
+PORT = int(os.environ.get("PORT", 8000))
 
 class Handler(BaseHTTPRequestHandler):
 
@@ -120,10 +119,9 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-
     server = HTTPServer((HOST, PORT), Handler)
 
-    print(f"Server running at http://{HOST}:{PORT}")
+    print(f"Server running on {HOST}:{PORT}")
     print("Press Ctrl+C to stop.")
 
     server.serve_forever()
