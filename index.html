@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>JSON to CSV Converter</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, sans-serif;
+
+            background: #f3f4f6;
+        }
+
+        .container {
+            width: 450px;
+            padding: 35px;
+
+            background: white;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.1);
+
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+
+            border: 2px dashed #aaa;
+
+            border-radius: 10px;
+
+            padding: 30px;
+
+            margin-bottom: 20px;
+        }
+
+        input[type="file"] {
+            margin-top: 15px;
+        }
+
+        button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 7px;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #status {
+
+            margin-top: 20px;
+
+            font-size: 14px;
+
+            color: #555;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>JSON → CSV</h1>
+
+        <div class="subtitle">
+            Convert your JSON file to CSV
+        </div>
+
+        <div class="upload-area">
+
+            <strong>Select JSON file</strong>
+
+            <br>
+
+            <input
+                type="file"
+                id="jsonFile"
+                accept=".json,application/json"
+            >
+
+        </div>
+
+        <button
+            id="convertButton"
+            onclick="convertJSON()"
+        >
+            Convert to CSV
+        </button>
+
+        <div id="status"></div>
+
+    </div>
+
+
+    <script>
+
+        async function convertJSON() {
+
+            const fileInput =
+                document.getElementById("jsonFile");
+
+            const button =
+                document.getElementById("convertButton");
+
+            const status =
+                document.getElementById("status");
+
+            if (!fileInput.files.length) {
+
+                status.textContent =
+                    "Please select a JSON file.";
+
+                return;
+            }
+
+            const file = fileInput.files[0];
+
+            try {
+
+                status.textContent =
+                    "Reading JSON...";
+
+                // Read file
+                const text =
+                    await file.text();
+
+                // Check that JSON is valid
+                JSON.parse(text);
+
+                status.textContent =
+                    "Converting...";
+
+                button.disabled = true;
+
+                // Send JSON to Python
+                const response =
+                    await fetch("/convert", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: text
+                    });
+
+                if (!response.ok) {
+
+                    const error =
+                        await response.json();
+
+                    throw new Error(error.error);
+                }
+
+                // Get CSV
+                const blob =
+                    await response.blob();
+
+                // Create download link
+                const url =
+                    window.URL.createObjectURL(blob);
+
+                const a =
+                    document.createElement("a");
+
+                a.href = url;
+
+                a.download =
+                    "converted.csv";
+
+                document.body.appendChild(a);
+
+                a.click();
+
+                a.remove();
+
+                window.URL.revokeObjectURL(url);
+
+                status.textContent =
+                    "✓ Conversion successful!";
+
+            }
+
+            catch (error) {
+
+                status.textContent =
+                    "Error: " + error.message;
+
+            }
+
+            finally {
+
+                button.disabled = false;
+
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
