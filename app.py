@@ -17,7 +17,7 @@ class Handler(BaseHTTPRequestHandler):
 
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html")
-                self.send_header("Content-Length", len(content))
+                self.send_header("Content-Length", str(len(content)))
                 self.end_headers()
 
                 self.wfile.write(content)
@@ -92,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             self.send_header(
                 "Content-Length",
-                len(csv_data)
+                str(len(csv_data))
             )
             self.end_headers()
 
@@ -111,7 +111,7 @@ class Handler(BaseHTTPRequestHandler):
             )
             self.send_header(
                 "Content-Length",
-                len(error)
+                str(len(error))
             )
             self.end_headers()
 
